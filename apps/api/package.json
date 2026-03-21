@@ -1,0 +1,21 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@supabase/supabase-js": "^2.99.3",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.3.1",
+    "fastify": "^5.8.2",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
