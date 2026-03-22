@@ -55,16 +55,18 @@ async function getRoomById(roomId) {
     .from('rooms')
     .select('*')
     .eq('id', roomId)
-    .single();
+    .single()
 
   if (error) {
-    // If no row found, Supabase returns error code PGRST116
-    // In that case we return null instead of throwing
-    if (error.code === 'PGRST116') return null;
-    throw new Error(`Failed to get room: ${error.message}`);
+    // PGRST116 = no rows found → return null so controller sends 404
+    // 22P02 = invalid UUID format → also return null
+    if (error.code === 'PGRST116' || error.code === '22P02') {
+      return null
+    }
+    throw new Error(`Failed to get room: ${error.message}`)
   }
 
-  return room;
+  return room
 }
 
 // Updates the room status
