@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { apiLogin } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -19,8 +20,6 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -45,25 +44,17 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${BASE_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+      const data = await apiLogin(formData.email, formData.password)
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || "Login failed")
+      if (data.error) {
+        setError(data.error)
+        return
       }
 
-      //store JWT
-      localStorage.setItem("token", data.token)
-
-      // redirect to dashboard
-      router.push("/dashboard")
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+        router.push('/dashboard')
+      }
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")

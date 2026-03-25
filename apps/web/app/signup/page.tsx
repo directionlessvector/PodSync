@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { apiSignup } from "@/lib/api"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -21,8 +22,6 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -75,18 +74,11 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${BASE_URL}/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+      const data = await apiSignup(formData.name, formData.email, formData.password)
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || "Signup failed")
+      if (data.error) {
+        setError(data.error)
+        return
       }
 
       setSuccess(true)
