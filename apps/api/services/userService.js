@@ -1,5 +1,22 @@
 const supabase = require('../db');
 
+async function checkDatabaseConnection() {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id')
+      .limit(1);
+
+    if (error) {
+      throw new Error('Database connection failed: ' + error.message);
+    }
+
+    return true;
+  } catch (err) {
+    throw err;
+  }
+}
+
 async function createUser({ email, hashedPassword, name }) {
   const { data, error } = await supabase
     .from('users')
@@ -58,6 +75,7 @@ async function getUserById(id) {
 }
 
 module.exports = {
+  checkDatabaseConnection,
   createUser,
   getUserByEmail,
   getUserById,

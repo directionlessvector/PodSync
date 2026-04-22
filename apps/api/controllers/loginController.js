@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { getUserByEmail } = require('../services/userService');
+const { checkDatabaseConnection, getUserByEmail } = require('../services/userService');
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -12,6 +12,10 @@ const JWT_EXPIRES_IN = '1h';
 
 async function login(request, reply) {
   try {
+    // Check database connection
+    await checkDatabaseConnection();
+    request.log.info('Database connection verified');
+
     const { email, password } = request.body;
 
     if (!email || !password) {
