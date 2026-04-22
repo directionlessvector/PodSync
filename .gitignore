@@ -27,6 +27,8 @@ out/
 build
 dist
 
+# Local test harness
+testing/
 
 # Debug
 npm-debug.log*
