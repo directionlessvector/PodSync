@@ -2,6 +2,7 @@ const { authenticate } = require('../middleware/authMiddleware');
 const {
   handleGetMyRole,
   handleJoinRoom,
+  handleJoinAsSpeaker,
   handleInviteSpeaker,
   handleGetParticipants,
 } = require('../controllers/participantController');
@@ -22,6 +23,14 @@ async function participantRoutes(fastify, options) {
     '/rooms/:roomId/join',
     { preHandler: authenticate },
     handleJoinRoom
+  );
+
+  // POST /rooms/:roomId/join-as-speaker
+  // Called by the room page — anyone with the speaker link can self-join as speaker
+  fastify.post(
+    '/rooms/:roomId/join-as-speaker',
+    { preHandler: authenticate },
+    handleJoinAsSpeaker
   );
 
   // POST /rooms/:roomId/invite

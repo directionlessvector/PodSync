@@ -8,7 +8,6 @@ import { apiCreateRoom } from '../../../lib/api'
 interface CreatedRoom {
   roomId: string
   speakerUrl: string
-  audienceUrl: string
   name: string
 }
 
@@ -45,7 +44,6 @@ export default function CreateRoomPage() {
         setCreatedRoom({
           roomId: data.room.id,
           speakerUrl: data.speakerUrl,
-          audienceUrl: data.audienceUrl,
           name: data.room.name,
         })
       }
@@ -94,24 +92,6 @@ export default function CreateRoomPage() {
                 <button
                   onClick={() => copyToClipboard(createdRoom.speakerUrl, 'Speaker link')}
                   className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-                >
-                  Copy
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Audience link</span>
-                <span className="text-xs text-gray-500">Share publicly — no login needed</span>
-              </div>
-              <div className="flex gap-2">
-                <div className="flex-1 bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 truncate">
-                  {createdRoom.audienceUrl}
-                </div>
-                <button
-                  onClick={() => copyToClipboard(createdRoom.audienceUrl, 'Audience link')}
-                  className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm transition-colors"
                 >
                   Copy
                 </button>

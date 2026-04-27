@@ -3,7 +3,9 @@ const {
   handleCreateRoom,
   handleGetRoom,
   handleUpdateRoomStatus,
+  handleUpdateRecordingState,
   handleGetMyRooms,
+  handleGetLiveKitToken,
 } = require('../controllers/roomController');
 
 async function roomRoutes(fastify, options) {
@@ -35,6 +37,20 @@ async function roomRoutes(fastify, options) {
     '/rooms/:roomId/status',
     { preHandler: authenticate },  // only host can do this
     handleUpdateRoomStatus
+  );
+
+  // PATCH /rooms/:roomId/recording — update global recording state
+  fastify.patch(
+    '/rooms/:roomId/recording',
+    { preHandler: authenticate },  // only host can do this
+    handleUpdateRecordingState
+  );
+
+  // GET /rooms/:roomId/livekit-token — generate LiveKit token
+  fastify.get(
+    '/rooms/:roomId/livekit-token',
+    { preHandler: authenticate },  // must be logged in to get a token with roles
+    handleGetLiveKitToken
   );
 }
 

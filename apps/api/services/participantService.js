@@ -21,31 +21,36 @@ async function getParticipantRole(roomId, userId) {
   return data.role; // 'speaker' or 'audience'
 }
 
-// Adds a participant to a room
-// Uses upsert so calling this twice does not throw an error
-// If they already have a role, it stays unchanged
+// Adds a participant to a room.
+// ignoreDuplicates: true — if row exists, keep existing role unchanged.
+// Used for audience joins (never downgrade a speaker to audience).
 async function addParticipant({ roomId, userId, role }) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('room_participants')
     .upsert(
-      {
-        room_id: roomId,
-        user_id: userId,
-        role,
-      },
-      {
-        onConflict: 'room_id,user_id', // the unique constraint on your table
-        ignoreDuplicates: true,        // if row exists, do nothing
-      }
+      { room_id: roomId, user_id: userId, role },
+      { onConflict: 'room_id,user_id', ignoreDuplicates: true }
     )
-    .select()
-    .single();
 
   if (error) {
-    throw new Error(`Failed to add participant: ${error.message}`);
+    throw new Error(`Failed to add participant: ${error.message}`)
   }
+}
 
-  return data;
+// Joins or upgrades a participant to speaker.
+// ignoreDuplicates: false — intentionally overwrites audience → speaker.
+// Used when someone opens the speaker link (the link is the authorization).
+async function joinAsSpeaker({ roomId, userId }) {
+  const { error } = await supabase
+    .from('room_participants')
+    .upsert(
+      { room_id: roomId, user_id: userId, role: 'speaker' },
+      { onConflict: 'room_id,user_id', ignoreDuplicates: false }
+    )
+
+  if (error) {
+    throw new Error(`Failed to join as speaker: ${error.message}`)
+  }
 }
 
 // Host invites a specific user to join as a co-speaker
@@ -118,6 +123,7 @@ async function getRoomParticipants(roomId) {
 module.exports = {
   getParticipantRole,
   addParticipant,
+  joinAsSpeaker,
   inviteSpeaker,
   getRoomParticipants,
 };

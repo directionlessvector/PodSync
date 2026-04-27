@@ -8,7 +8,7 @@ if (!jwtSecret) {
   throw new Error('JWT_SECRET must be set in environment variables');
 }
 
-const JWT_EXPIRES_IN = '1h';
+const JWT_EXPIRES_IN = '7d';
 
 async function login(request, reply) {
   try {

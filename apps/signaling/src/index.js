@@ -4,11 +4,11 @@ const { WebSocketServer } = require('ws');
 const {
   getAllClients,
   markAlive,
-  getClient
+  getClient,
+  broadcastToRoom
 } = require('./state/roomRegistry');
 const { handleJoin } = require('./handlers/joinHandler');
 const { handleLeave } = require('./handlers/leaveHandler');
-const { handleSignal } = require('./handlers/signalHandler');
 const { startHeartbeat } = require('./heartbeat');
 
 const PORT = process.env.SIGNALING_PORT || 5000;
@@ -59,11 +59,19 @@ wss.on('connection', (ws) => {
         }
         break;
 
-      case 'signal:offer':
-      case 'signal:answer':
-      case 'signal:ice-candidate':
+      case 'room:broadcast':
         if (userId) {
-          handleSignal(userId, event, message);
+          const client = getClient(userId);
+          if (client && client.roomId) {
+            // Security Guard: Only the host can broadcast recording commands
+            if (message.payload && typeof message.payload.action === 'string' && message.payload.action.includes('recording')) {
+              if (client.role !== 'host') {
+                console.warn(`Unauthorized recording command dropped from ${userId}`);
+                return;
+              }
+            }
+            broadcastToRoom(client.roomId, userId, message);
+          }
         }
         break;
 

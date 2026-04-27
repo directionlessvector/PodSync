@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -12,6 +12,10 @@ import { apiLogin } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) router.replace('/dashboard')
+  }, [router])
 
   const [formData, setFormData] = useState({
     email: "",

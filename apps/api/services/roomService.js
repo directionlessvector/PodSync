@@ -102,6 +102,42 @@ async function updateRoomStatus({ roomId, status, hostId }) {
   return updated;
 }
 
+// Updates the recording state
+// Starts or stops the global recording state for the room
+async function updateRecordingState({ roomId, isRecording, hostId }) {
+  const { data: room, error: fetchError } = await supabase
+    .from('rooms')
+    .select('host_id')
+    .eq('id', roomId)
+    .single();
+
+  if (fetchError || !room) {
+    throw new Error('Room not found');
+  }
+
+  if (room.host_id !== hostId) {
+    throw new Error('Only the host can update recording status');
+  }
+
+  const updates = {
+    is_recording: isRecording,
+    recording_start_at: isRecording ? new Date().toISOString() : null
+  };
+
+  const { data: updated, error } = await supabase
+    .from('rooms')
+    .update(updates)
+    .eq('id', roomId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update recording state: ${error.message}`);
+  }
+
+  return updated;
+}
+
 // Gets all rooms created by a specific user
 // Used on the dashboard to show "Your rooms"
 async function getRoomsByHost(hostId) {
@@ -122,5 +158,6 @@ module.exports = {
   createRoom,
   getRoomById,
   updateRoomStatus,
+  updateRecordingState,
   getRoomsByHost,
 };

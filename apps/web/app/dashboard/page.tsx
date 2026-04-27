@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../hooks/useAuth'
-import { apiGetMyRooms } from '../../lib/api'
+import { apiGetMyRooms, AuthError } from '../../lib/api'
 
 interface Room {
   id: string
@@ -11,7 +11,6 @@ interface Room {
   episodeTitle?: string
   status: 'waiting' | 'live' | 'ended'
   speakerUrl: string
-  audienceUrl: string
   createdAt: string
 }
 
@@ -31,7 +30,7 @@ export default function DashboardPage() {
         const data = await apiGetMyRooms(token)
         setRooms(data.rooms || [])
       } catch (error) {
-        console.error('Failed to fetch rooms:', error)
+        if (error instanceof AuthError) router.replace('/login')
       } finally {
         setLoading(false)
       }
@@ -143,18 +142,6 @@ export default function DashboardPage() {
                     </div>
                     <button
                       onClick={() => copyToClipboard(room.speakerUrl, 'Speaker link')}
-                      className="shrink-0 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition-colors"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 w-24 shrink-0">Audience link</span>
-                    <div className="flex-1 bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 truncate">
-                      {room.audienceUrl}
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(room.audienceUrl, 'Audience link')}
                       className="shrink-0 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg transition-colors"
                     >
                       Copy

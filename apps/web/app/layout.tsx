@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 import { Geist } from "next/font/google"
-import Link from "next/link"
-
 import "./globals.css"
 import { cn } from "@/lib/utils"
+import NavBar from "@/components/NavBar"
 
 const geist = Geist({
   subsets: ["latin"],
@@ -40,43 +39,11 @@ export default function RootLayout({
           "min-h-screen bg-slate-50 text-slate-900"
         )}
       >
-        {/* App Wrapper */}
         <div className="flex min-h-screen flex-col">
-          
-          {/* Navbar */}
-          <header className="border-b bg-white">
-            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-              
-              {/* Logo / Brand */}
-              <Link href="/" className="font-semibold text-lg">
-                🎙️ Podcast Studio
-              </Link>
-
-              {/* Nav Links */}
-              <nav className="flex items-center gap-4 text-sm">
-                <Link href="/signup" className="hover:text-blue-600">
-                  Signup
-                </Link>
-                <Link href="/login" className="hover:text-blue-600">
-                  Login
-                </Link>
-              </nav>
-
-            </div>
-          </header>
-
-          {/* Main Content */}
+          <NavBar />
           <main className="flex-1">
             {children}
           </main>
-
-          {/* Footer (optional but nice) */}
-          <footer className="border-t bg-white">
-            <div className="mx-auto max-w-6xl px-4 py-4 text-sm text-gray-500">
-              © {new Date().getFullYear()} Podcast Studio
-            </div>
-          </footer>
-
         </div>
       </body>
     </html>

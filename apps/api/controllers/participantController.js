@@ -1,4 +1,4 @@
-const { getParticipantRole, addParticipant,
+const { getParticipantRole, addParticipant, joinAsSpeaker,
         inviteSpeaker, getRoomParticipants } = require('../services/participantService');
 const { getRoomById } = require('../services/roomService');
 
@@ -149,9 +149,29 @@ async function handleGetParticipants(request, reply) {
   }
 }
 
+// POST /rooms/:roomId/join-as-speaker
+// Called by the room page when a user opens the speaker link.
+// Upserts them as speaker — upgrades audience → speaker if needed.
+async function handleJoinAsSpeaker(request, reply) {
+  try {
+    const { roomId } = request.params;
+    const room = await getRoomById(roomId);
+    if (!room) return reply.status(404).send({ error: 'Room not found' });
+    if (room.status === 'ended') return reply.status(400).send({ error: 'This session has ended' });
+
+    await joinAsSpeaker({ roomId, userId: request.user.id });
+
+    return reply.send({ success: true, role: 'speaker', roomId, roomName: room.name });
+  } catch (err) {
+    request.log.error(err);
+    return reply.status(500).send({ error: err.message });
+  }
+}
+
 module.exports = {
   handleGetMyRole,
   handleJoinRoom,
+  handleJoinAsSpeaker,
   handleInviteSpeaker,
   handleGetParticipants,
 };
