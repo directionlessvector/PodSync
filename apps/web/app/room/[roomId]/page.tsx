@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { LiveKitRoom, useLocalParticipant, useParticipants, VideoTrack, RoomAudioRenderer, useRemoteParticipant, useConnectionState } from '@livekit/components-react'
+import { LiveKitRoom, useLocalParticipant, useParticipants, VideoTrack, RoomAudioRenderer, StartAudio, useRemoteParticipant, useConnectionState } from '@livekit/components-react'
 import { Track, Participant, ConnectionState } from 'livekit-client'
 import { useWebRTC } from '../../../hooks/useWebRTC'
 import { useMediaRecorder } from '../../../hooks/useMediaRecorder'
@@ -161,7 +161,8 @@ export default function RoomPage() {
         // If they have no role yet (e.g. newly invited co-host), auto-join them.
         const roleData = await apiGetMyRole(storedToken, roomId)
         const userId = profileData.user?.id || profileData.id
-        const isHost = roomData.room.host_id === userId
+        const hostId = roomData.room.host_id || roomData.room.hostId
+        const isHost = hostId === userId
         // Host has role 'host', not 'speaker' — both skip the join-as-speaker call
         const isAlreadyParticipant = isHost || (!roleData.error && roleData.role === 'speaker')
 
@@ -196,7 +197,7 @@ export default function RoomPage() {
           id: roomId,
           name: roomData.room.name,
           status: roomData.room.status,
-          host_id: roomData.room.host_id,
+          host_id: hostId,
           episodeTitle: roomData.room.episode_title,
           isRecording: roomData.room.isRecording,
           recordingStartAt: roomData.room.recordingStartAt,
@@ -281,11 +282,11 @@ function RoomContent({ user, room: initialRoom, token }: { user: UserInfo, room:
   const remoteParticipants = participants.filter(p => !p.isLocal)
 
   // WebSocket signaling for recording controls
-  const {
-    connected: wsConnected,
-    sendSignal,
-    broadcastMsg,
-  } = useWebRTC({ userId: user.id, roomId: room.id, role: 'speaker', enabled: true })
+	  const {
+	    connected: wsConnected,
+	    sendSignal,
+	    broadcastMsg,
+	  } = useWebRTC({ userId: user.id, roomId: room.id, role: isHost ? 'host' : 'speaker', enabled: true })
 
   // Integration of local recording
   const { isRecording, recordingTime, startRecording, stopRecording, completedRecording, clearRecording } = useMediaRecorder({
@@ -475,11 +476,15 @@ function RoomContent({ user, room: initialRoom, token }: { user: UserInfo, room:
   // All participants in this room are speakers, so always include self in count
   const totalSpeakers = remoteParticipants.length + 1
 
-  return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      <RoomAudioRenderer />
-      
-      {/* Header */}
+	  return (
+	    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+	      <RoomAudioRenderer />
+	      <StartAudio
+	        label="Click to enable audio"
+	        className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-lg"
+	      />
+	      
+	      {/* Header */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">

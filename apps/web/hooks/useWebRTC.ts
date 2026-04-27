@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const SIGNALING_URL = process.env.NEXT_PUBLIC_SIGNALING_URL || 'ws://localhost:5004'
 
-type Role = 'speaker'
+	type Role = 'speaker' | 'host'
 
 interface UseWebRTCOptions {
   userId: string
